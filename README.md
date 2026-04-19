@@ -1,4 +1,5 @@
-<img width="1536" height="1024" alt="ChatGPT Image Apr 19, 2026, 10_47_47 PM" src="https://github.com/user-attachments/assets/91fbf268-7882-40db-a001-9a56a29db3d2" />
+<img width="1536" height="1024" alt="ChatGPT Image Apr 19, 2026, 10_45_20 PM" src="https://github.com/user-attachments/assets/ff9f8a77-7665-4594-89c7-90d9b58447ab" />
+
 
 # Kaizen (TLDR-ON-STEROIDS 💪)
 
