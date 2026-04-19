@@ -11,7 +11,9 @@ OPTION_TOKEN_RE = rf"(?:{AT_OPTION_RE}|{LONG_OPTION_RE}|{SHORT_OPTION_RE})(?:[ =
 OPTION_DECL_RE = re.compile(
     rf"^\s*(?P<usage>{OPTION_TOKEN_RE}(?:\s*,\s*{OPTION_TOKEN_RE})*)(?:\s{{2,}}|\t+|$)"
 )
-FLAG_CAPTURE_RE = re.compile(rf"(?<!\w)({AT_OPTION_RE}|{LONG_OPTION_RE}|{SHORT_OPTION_RE})")
+FLAG_CAPTURE_RE = re.compile(
+    rf"(?<!\w)({AT_OPTION_RE}|{LONG_OPTION_RE}|{SHORT_OPTION_RE})"
+)
 
 
 @dataclass
@@ -41,7 +43,9 @@ class ManPage:
 def parse_man_page(text: str, query: str = "") -> ManPage:
     sections = parse_man_sections(text)
 
-    command, aliases, summary = _parse_name_section(sections.get("NAME", ""), fallback=query)
+    command, aliases, summary = _parse_name_section(
+        sections.get("NAME", ""), fallback=query
+    )
     known_commands = [item for item in [command, *aliases, query] if item]
 
     synopsis = _parse_synopsis(sections.get("SYNOPSIS", ""), known_commands)
@@ -125,7 +129,12 @@ def _parse_synopsis(text: str, known_commands: List[str]) -> List[str]:
 def _extract_options(sections: Dict[str, str]) -> List[ManOption]:
     options: List[ManOption] = []
 
-    for section_name in ("OPTIONS", "DESCRIPTION"):
+    for section_name in (
+        "OPTIONS",
+        "DESCRIPTION",
+        "COMMAND-LINE OPTIONS",
+        "LISTING OPTIONS",
+    ):
         section_text = sections.get(section_name, "")
         if not section_text:
             continue
@@ -171,7 +180,9 @@ def _extract_options_from_text(text: str) -> List[ManOption]:
     return options
 
 
-def _extract_examples(sections: Dict[str, str], known_commands: List[str]) -> List[Dict[str, str]]:
+def _extract_examples(
+    sections: Dict[str, str], known_commands: List[str]
+) -> List[Dict[str, str]]:
     examples: List[Dict[str, str]] = []
 
     for section_name in ("EXAMPLES", "EXAMPLE"):
@@ -244,7 +255,9 @@ def _build_option(header: str, body: List[str]) -> Optional[ManOption]:
     flags = [_normalize_flag(flag) for flag in FLAG_CAPTURE_RE.findall(usage)]
     flags = _dedupe(flags)
 
-    short_flags = [flag for flag in flags if flag.startswith("-") and not flag.startswith("--")]
+    short_flags = [
+        flag for flag in flags if flag.startswith("-") and not flag.startswith("--")
+    ]
     long_flags = [flag for flag in flags if flag.startswith("--")]
 
     return ManOption(

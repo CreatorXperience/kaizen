@@ -2,9 +2,7 @@ from typing import Dict
 import re
 
 SECTION_HEADER = re.compile(r"^[A-Z][A-Z0-9 &/\-]{1,60}$")
-SECTION_ALIASES = {
-    "EXAMPLE": "EXAMPLES",
-}
+SECTION_ALIASES = {"EXAMPLE": "EXAMPLES"}
 
 
 def parse_man_sections(text: str) -> Dict[str, str]:
