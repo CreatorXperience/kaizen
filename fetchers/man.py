@@ -37,7 +37,9 @@ def fetch_man_page(command: str):
         result = subprocess.run(["man", command], capture_output=True, text=True)
 
         if result.returncode != 0:
-            return None
+            result = subprocess.run([command, "--help"], capture_output=True, text=True)
+            if result.returncode != 0:
+                return None
 
         text = _strip_terminal_formatting(result.stdout)
 
