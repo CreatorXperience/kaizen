@@ -3,7 +3,7 @@
 
 # Kaizen (TLDR-ON-STEROIDS 💪)
 
-Kaizen is a terminal tool that turns Unix `man` pages into a compact, TLDR-like command guide. Kaizen inspired by tldr-pages.
+Kaizen (japanese word for continous improvement) is a terminal tool that turns Unix `man` pages into a compact, TLDR-like command guide. Kaizen was inspired by tldr-pages.
 
 It fetches a command's manual page, parses it into a structured object, extracts useful options and examples, and prints a short command-oriented summary that is easier to learn from than a full manual page.
 
