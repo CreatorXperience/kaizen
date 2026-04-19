@@ -1,3 +1,5 @@
+![Uploading ChatGPT Image Apr 19, 2026, 10_47_47 PM.png…]()
+
 # Kaizen (TLDR-ON-STEROIDS 💪)
 
 Kaizen is a terminal tool that turns Unix `man` pages into a compact, TLDR-like command guide.
