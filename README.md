@@ -1,4 +1,4 @@
-![Uploading ChatGPT Image Apr 19, 2026, 10_47_47 PM.png…]()
+<img width="1536" height="1024" alt="ChatGPT Image Apr 19, 2026, 10_47_47 PM" src="https://github.com/user-attachments/assets/91fbf268-7882-40db-a001-9a56a29db3d2" />
 
 # Kaizen (TLDR-ON-STEROIDS 💪)
 
