@@ -4,10 +4,14 @@ from typing import Dict, List, Optional
 
 from parsers.man_sections import parse_man_sections
 
-SHORT_OPTION_RE = r"-[^,\s](?:\[[^\]]+\])?"
-LONG_OPTION_RE = r"--[A-Za-z0-9][A-Za-z0-9-]*(?:\[[^\]]+\])?"
+SHORT_OPTION_RE = r"-[A-Za-z0-9][^,\s]*"
+LONG_OPTION_RE = r"--[A-Za-z0-9][^,\s]*"
 AT_OPTION_RE = r"@[A-Za-z0-9_<>\[\]./\-]+"
-OPTION_TOKEN_RE = rf"(?:{AT_OPTION_RE}|{LONG_OPTION_RE}|{SHORT_OPTION_RE})(?:[ =][A-Za-z<>\[\]\-][A-Za-z0-9_<>\[\]\-]*)?"
+OPTION_ARG_RE = r"[A-Za-z0-9_<>\[\]\{\}\(\)./:\-|,]+"
+OPTION_TOKEN_RE = (
+    rf"(?:{AT_OPTION_RE}|{LONG_OPTION_RE}|{SHORT_OPTION_RE})"
+    rf"(?:[ =]+{OPTION_ARG_RE})?"
+)
 OPTION_DECL_RE = re.compile(
     rf"^\s*(?P<usage>{OPTION_TOKEN_RE}(?:\s*,\s*{OPTION_TOKEN_RE})*)(?:\s{{2,}}|\t+|$)"
 )
@@ -49,7 +53,7 @@ def parse_man_page(text: str, query: str = "") -> ManPage:
     known_commands = [item for item in [command, *aliases, query] if item]
 
     synopsis = _parse_synopsis(sections.get("SYNOPSIS", ""), known_commands)
-    options = _extract_options(sections)
+    options = _extract_options(sections, full_text=text)
     examples = _extract_examples(sections, known_commands)
 
     if not command:
@@ -126,7 +130,7 @@ def _parse_synopsis(text: str, known_commands: List[str]) -> List[str]:
     return _dedupe(entries)
 
 
-def _extract_options(sections: Dict[str, str]) -> List[ManOption]:
+def _extract_options(sections: Dict[str, str], full_text: str = "") -> List[ManOption]:
     options: List[ManOption] = []
 
     for section_name in (
@@ -197,11 +201,14 @@ def _extract_options(sections: Dict[str, str]) -> List[ManOption]:
 
         options.extend(_extract_options_from_text(section_text))
 
+    if not options and full_text:
+        options.extend(_extract_options_from_text(full_text))
+
     deduped: List[ManOption] = []
     seen = set()
 
     for option in options:
-        key = option.usage.lower()
+        key = option.usage
         if key in seen:
             continue
         seen.add(key)
@@ -222,6 +229,14 @@ def _extract_options_from_text(text: str) -> List[ManOption]:
                 if parsed:
                     options.append(parsed)
             current_header = raw_line.rstrip()
+            current_body = []
+            continue
+
+        if current_header and _is_option_section_break(raw_line):
+            parsed = _build_option(current_header, current_body)
+            if parsed:
+                options.append(parsed)
+            current_header = None
             current_body = []
             continue
 
@@ -336,22 +351,23 @@ def _is_option_start(line: str) -> bool:
 
 def _extract_argument(usage: str) -> Optional[str]:
     patterns = (
-        r"--[A-Za-z0-9][A-Za-z0-9-]*\[?=(?P<arg>[A-Za-z<>\[\]\-][A-Za-z0-9_<>\[\]\-]*)\]?",
-        r"(?:--[A-Za-z0-9][A-Za-z0-9-]*|-[^,\s]|@[A-Za-z0-9_<>\[\]./\-]+)\s+(?P<arg>[A-Za-z<>\[\]\-][A-Za-z0-9_<>\[\]\-]*)",
+        r"--[A-Za-z0-9][^,\s]*\[?=(?P<arg>[A-Za-z0-9_<>\[\]\{\}\(\)./:\-|,]+)\]?",
+        r"(?:--[A-Za-z0-9][^,\s]*|-[A-Za-z0-9][^,\s]*|@[A-Za-z0-9_<>\[\]./\-]+)\s+(?P<arg>[A-Za-z0-9_<>\[\]\{\}\(\)./:\-|,]+)",
         r"@(?P<arg>[A-Za-z0-9_<>\[\]./\-]+)$",
     )
 
     for pattern in patterns:
         match = re.search(pattern, usage)
         if match:
-            return match.group("arg").strip("<>[]")
+            return match.group("arg").strip("<>[]{}()")
 
     return None
 
 
 def _normalize_flag(flag: str) -> str:
-    flag = re.sub(r"\[=.*$", "", flag)
-    flag = re.sub(r"\[[^\]]+\]$", "", flag)
+    flag = re.sub(r"\[.*$", "", flag)
+    flag = re.sub(r"=.*$", "", flag)
+    flag = flag.rstrip(",:;")
     return flag
 
 
@@ -416,3 +432,17 @@ def _strip_prompt(line: str) -> str:
 
 def _normalize_example_description(line: str) -> str:
     return line.lstrip("-* ").strip()
+
+
+def _is_option_section_break(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return True
+
+    if _is_option_start(line):
+        return False
+
+    if stripped.endswith(":"):
+        return True
+
+    return not line.startswith((" ", "\t"))

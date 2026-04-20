@@ -39,12 +39,12 @@ def summarize_commands(
     if start and end:
         payload = {
             "query": query,
-            "commands": cleaned[start - 1 : end - 1],
+            "commands": cleaned[start:end],
         }
     elif start and not end:
         payload = {
             "query": query,
-            "commands": cleaned[start - 1 :],
+            "commands": cleaned[start:],
         }
     elif end and not start:
         payload = {
