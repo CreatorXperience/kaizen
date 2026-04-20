@@ -14,12 +14,13 @@ def build_commands(man_page: Dict[str, object]) -> List[Dict[str, str]]:
         if not isinstance(item, dict):
             continue
         cmd = item.get("cmd", "").strip()
+        desc = item.get("desc", "").strip().split()
         if not cmd or cmd in seen:
             continue
         seen.add(cmd)
         commands.append(
             {
-                "desc": item.get("desc", "").strip() or "Example from the man page",
+                "desc": " ".join(desc[:50]) + ".." or "Example from the man page",
                 "cmd": cmd,
             }
         )
@@ -35,10 +36,11 @@ def build_commands(man_page: Dict[str, object]) -> List[Dict[str, str]]:
         if cmd in seen:
             continue
 
+        opt = option.get("description", "").strip().split()
         seen.add(cmd)
         commands.append(
             {
-                "desc": option.get("description", "").strip(),
+                "desc": " ".join(opt[:50]) + "..",
                 "cmd": cmd,
             }
         )

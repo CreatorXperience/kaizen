@@ -6,6 +6,8 @@ def summarize_commands(
     commands: List[Dict[str, str]],
     man_page: Optional[Dict[str, Any]] = None,
     limit: int = 20,
+    start: int = 0,
+    end: int = 0,
 ) -> Dict:
     """
     Convert extracted commands into TLDR-style output
@@ -33,10 +35,29 @@ def summarize_commands(
 
         cleaned.append({"desc": desc, "cmd": cmd})
 
-    payload = {
-        "query": query,
-        "commands": cleaned[:limit],
-    }
+    payload = {}
+    if start and end:
+        payload = {
+            "query": query,
+            "commands": cleaned[start - 1 : end - 1],
+        }
+    elif start and not end:
+        payload = {
+            "query": query,
+            "commands": cleaned[start - 1 :],
+        }
+    elif end and not start:
+        payload = {
+            "query": query,
+            "commands": cleaned[0:end],
+        }
+
+    if not start and not end:
+
+        payload = {
+            "query": query,
+            "commands": cleaned[:limit],
+        }
 
     if man_page:
         payload["man_page"] = man_page

@@ -7,7 +7,14 @@ from ai.summarizer import summarize_commands
 from core.formatter import format_output
 
 
-def run_query(query: str, update: bool = False, offline: bool = False, limit: int = 20):
+def run_query(
+    query: str,
+    update: bool = False,
+    offline: bool = False,
+    limit: int = 20,
+    start: int = 0,
+    end: int = 0,
+):
 
     # check cache
     if not update:
@@ -42,6 +49,8 @@ def run_query(query: str, update: bool = False, offline: bool = False, limit: in
         commands,
         man_page=man_page_data,
         limit=limit,
+        start=start,
+        end=end,
     )
 
     save_cache(query, summary)

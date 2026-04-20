@@ -9,12 +9,31 @@ def search(
     query: str = typer.Argument(..., help="Command or idea to search"),
     update: bool = typer.Option(False, "--update", "-u", help="Force update cache"),
     offline: bool = typer.Option(False, "--offline", "-o", help="Use cache only"),
-    limit: int = typer.Option(20, "--limit", "-l", help="Limit example output"),
+    limit: int = typer.Option(int, "--limit", "-l", help="Limit example output"),
+    start: int = typer.Option(
+        int,
+        "--startfrom",
+        "-s",
+        help="pick a number as a starting point, to limit scrolling, -l is void , when using this option",
+    ),
+    end: int = typer.Option(
+        int,
+        "--end",
+        "-e",
+        help="pick a number as a end point, to limit scrolling, -l is void when using this option",
+    ),
 ):
     """
     Search for cybersecurity commands
     """
-    run_query(query=query, update=update, offline=offline, limit=limit)
+    run_query(
+        query=query,
+        update=update,
+        offline=offline,
+        limit=limit or 5,
+        start=start,
+        end=end,
+    )
 
 
 @app.command()
